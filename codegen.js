@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 
-import { createWriteStream } from "node:fs";
-import { readFile } from "node:fs/promises";
-import { Readable } from "node:stream";
-import { pipeline } from "node:stream/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { pipe, range } from "./utils.js";
 
 const BEGIN = "/* CODEGEN-BEGIN */";
@@ -36,7 +33,4 @@ const codegen = pipe(
 );
 
 const source = await readFile(INPUT, "utf8");
-await pipeline(
-  Readable.from(codegen(source)),
-  createWriteStream(OUTPUT)
-);
+await writeFile(OUTPUT, codegen(source));
