@@ -8,20 +8,25 @@ import { pipe, range } from "./utils.js";
 
 const BEGIN = "/* CODEGEN-BEGIN */";
 const END = "/* CODEGEN-END */";
+const INPUT = "input.js";
+const OUTPUT = "output.js";
 
 const [
-  limit = 10000,
-  input = "input.js",
-  output = "output.js"
-] = process.argv.slice(2);
-const max = Number(limit);
+  max = 10000,
+  batchSize = 4096,
+] = process.argv.slice(2).map(Number);
 
 const renderCase = (n) =>
   `case ${n}n: return ${n % 2 === 0};\n`;
 
+const renderBatch = (start) => Array.from(
+  { length: Math.min(batchSize, max - start + 1) },
+  (_, offset) => renderCase(start + offset)
+).join("");
+
 function* generate([before, after]) {
   yield `${before}${BEGIN}\n`;
-  yield* range(0, max).map(renderCase);
+  yield* range(0, max, batchSize).map(renderBatch);
   yield `${END}${after}`;
 }
 
@@ -30,8 +35,8 @@ const codegen = pipe(
   generate,
 );
 
-const source = await readFile(input, "utf8");
+const source = await readFile(INPUT, "utf8");
 await pipeline(
   Readable.from(codegen(source)),
-  createWriteStream(output)
+  createWriteStream(OUTPUT)
 );
