@@ -1,0 +1,50 @@
+#!/usr/bin/env node
+
+import { createInterface } from "node:readline";
+import { pipe } from "./utils.js";
+
+console.log("奇偶数判断");
+
+createInterface({
+  input: process.stdin,
+  output: process.stdout,
+}).on("line", (input) =>
+  console.log(processInput(input))
+);
+
+const parseInteger = (s) =>
+  /^\d+$/.test(s)
+    ? BigInt(s)
+    : null;
+
+const checkParity = (n) => {
+  if (n === null) return "请输入整数";
+  if (isEven(n) === true) return "是偶数";
+  if (isEven(n) === false) return "不是偶数";
+  return "超出范围";
+};
+
+const processInput = pipe(
+  (s) => s.trim(),
+  parseInteger,
+  checkParity
+);
+
+const isEven = (n) => {
+  switch (n) {
+/* CODEGEN-BEGIN */
+case 0n: return true;
+case 1n: return false;
+case 2n: return true;
+case 3n: return false;
+case 4n: return true;
+case 5n: return false;
+case 6n: return true;
+case 7n: return false;
+case 8n: return true;
+case 9n: return false;
+case 10n: return true;
+/* CODEGEN-END */
+default: return null;
+  }
+};
