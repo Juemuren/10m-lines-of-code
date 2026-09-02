@@ -25,9 +25,12 @@ const parseInteger = (s) =>
 
 const checkParity = (n) => {
   if (n === null) return "请输入整数";
-  if (isEven(n) === true) return "是偶数";
-  if (isEven(n) === false) return "不是偶数";
-  return "超出范围";
+
+  switch (isEven(n)) {
+    case true: return "是偶数";
+    case false: return "不是偶数";
+    default: return "超出范围";
+  }
 };
 
 const processInput = pipe(
