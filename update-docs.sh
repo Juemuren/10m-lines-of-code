@@ -21,14 +21,34 @@ get_code_block() {
     printf '%s\n' '```txt' "$output" '```'
 }
 
-tokei --no-ignore \
-    | get_code_block \
-    | update_section README.md TOKEI
+update_tokei() {
+    tokei --no-ignore \
+        | get_code_block \
+        | update_section README.md TOKEI
+}
 
-hyperfine --warmup 2 "node codegen.js 10000000" \
-    | get_code_block \
-    | update_section README.md CODEGEN-BENCHMARK
+update_codegen_benchmark() {
+    hyperfine --warmup 2 "node codegen.js 10000000" \
+        | get_code_block \
+        | update_section README.md CODEGEN-BENCHMARK
+}
 
-node benchmark-output.js \
-    | get_code_block \
-    | update_section README.md PROGRAM-BENCHMARK
+update_program_benchmark() {
+    node benchmark-output.js \
+        | get_code_block \
+        | update_section README.md PROGRAM-BENCHMARK
+}
+
+update_all() {
+    update_tokei
+    update_codegen_benchmark
+    update_program_benchmark
+}
+
+case ${1:-all} in
+    all) update_all ;;
+    tokei) update_tokei ;;
+    codegen-benchmark) update_codegen_benchmark ;;
+    program-benchmark) update_program_benchmark ;;
+    *) exit 2 ;;
+esac
