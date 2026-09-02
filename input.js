@@ -5,12 +5,18 @@ import { pipe } from "./utils.js";
 
 console.log("奇偶数判断");
 
-createInterface({
+const readline = createInterface({
   input: process.stdin,
   output: process.stdout,
-}).on("line", (input) =>
-  console.log(processInput(input))
-);
+  prompt: "> ",
+});
+
+readline.on("line", (input) => {
+  console.log(processInput(input));
+  readline.prompt();
+});
+
+readline.prompt();
 
 const parseInteger = (s) =>
   /^\d+$/.test(s)
