@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 update_section() {
     local file=$1
     local marker=$2
-    local content=$3
+    local content
+    content=$(cat)
 
     sd -A -f s \
         "<!-- $marker:BEGIN -->.*<!-- $marker:END -->" \
@@ -12,23 +15,20 @@ update_section() {
 }
 
 get_code_block() {
-    local output=$1
+    local output
+    output=$(cat)
 
-    cat << EOF
-\`\`\`txt
-$output
-\`\`\`
-EOF
+    printf '%s\n' '```txt' "$output" '```'
 }
 
-TOKEI_OUTPUT=$(tokei --no-ignore)
-TOKEI_CODE_BLOCK=$(get_code_block "$TOKEI_OUTPUT")
-update_section README.md TOKEI "$TOKEI_CODE_BLOCK"
+tokei --no-ignore \
+    | get_code_block \
+    | update_section README.md TOKEI
 
-CODEGEN_BENCHMARK_OUTPUT=$(hyperfine --warmup 2 "node codegen.js 10000000")
-CODEGEN_BENCHMARK_CODE_BLOCK=$(get_code_block "$CODEGEN_BENCHMARK_OUTPUT")
-update_section README.md CODEGEN-BENCHMARK "$CODEGEN_BENCHMARK_CODE_BLOCK"
+hyperfine --warmup 2 "node codegen.js 10000000" \
+    | get_code_block \
+    | update_section README.md CODEGEN-BENCHMARK
 
-PROGRAM_BENCHMARK_OUTPUT=$(node benchmark-output.js)
-PROGRAM_BENCHMARK_CODE_BLOCK=$(get_code_block "$PROGRAM_BENCHMARK_OUTPUT")
-update_section README.md PROGRAM-BENCHMARK "$PROGRAM_BENCHMARK_CODE_BLOCK"
+node benchmark-output.js \
+    | get_code_block \
+    | update_section README.md PROGRAM-BENCHMARK
