@@ -1,0 +1,10 @@
+{
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "codegen": "node codegen.js 10000000",
+    "start": "node output.js"
+  }
+}
