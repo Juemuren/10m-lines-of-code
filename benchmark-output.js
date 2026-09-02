@@ -8,23 +8,20 @@ import { pipe } from "./utils.js";
 
 const benchmarks = [
   {
-    command: "node output.js",
     args: ["output.js"],
     inputs: ["10000000", "9999999", "0", "9999998"],
   },
   {
-    command: "node --no-lazy output.js",
     args: ["--no-lazy", "output.js"],
     inputs: ["10000000", "9999999", "0", "9999998"],
   },
   {
-    command: "node input.js",
     args: ["input.js"],
     inputs: ["10", "9", "0", "8"],
   },
 ];
 
-const measureBenchmark = async ({ command, args, inputs }) => {
+const measureBenchmark = async ({ args, inputs }) => {
   const started = performance.now();
   const child = spawn(process.execPath, args, {
     stdio: ["pipe", "pipe", "inherit"],
@@ -45,18 +42,22 @@ const measureBenchmark = async ({ command, args, inputs }) => {
 
   const replies = await Array.fromAsync(
     inputs,
-    measureReply
+    measureReply,
   );
 
   child.stdin.end();
   await once(child, "close");
 
-  return { command, startup, replies };
+  return {
+    command: ["node", ...args].join(" "),
+    startup,
+    replies,
+  };
 };
 
 const measureBenchmarks = (benchmarks) => Array.fromAsync(
   benchmarks,
-  measureBenchmark
+  measureBenchmark,
 );
 
 const formatTime = (ms) => ms >= 1000
