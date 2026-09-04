@@ -21,7 +21,23 @@ const benchmarks = [
   },
 ];
 
-const measureBenchmark = async ({ args, inputs }) => {
+const measurements = await measureBenchmarks(benchmarks);
+
+const toTable = pipe(
+  (measurements) => measurements.map(formatResult),
+  (results) => results.map(toTableRow),
+);
+
+console.table(toTable(measurements));
+
+function measureBenchmarks(benchmarks) {
+  return Array.fromAsync(
+    benchmarks,
+    measureBenchmark,
+  );
+};
+
+async function measureBenchmark({ args, inputs }) {
   const started = performance.now();
   const child = spawn(process.execPath, args, {
     stdio: ["pipe", "pipe", "inherit"],
@@ -33,10 +49,9 @@ const measureBenchmark = async ({ args, inputs }) => {
 
   const measureReply = async (input) => {
     const sentAt = performance.now();
-
     child.stdin.write(`${input}\n`);
-    await once(readline, "line");
 
+    await once(readline, "line");
     return performance.now() - sentAt;
   };
 
@@ -55,35 +70,27 @@ const measureBenchmark = async ({ args, inputs }) => {
   };
 };
 
-const measureBenchmarks = (benchmarks) => Array.fromAsync(
-  benchmarks,
-  measureBenchmark,
-);
+function formatResult({ command, startup, replies }) {
+  return {
+    command,
+    startup: formatTime(startup),
+    replies: replies.map(formatTime),
+  };
+};
 
-const formatTime = (ms) => ms >= 1000
-  ? `${(ms / 1000).toFixed(2)} s`
-  : `${ms.toFixed(2)} ms`;
+function formatTime(ms) {
+  return ms >= 1000
+    ? `${(ms / 1000).toFixed(2)} s`
+    : `${ms.toFixed(2)} ms`;
+};
 
-const formatResult = ({ command, startup, replies }) => ({
-  command,
-  startup: formatTime(startup),
-  replies: replies.map(formatTime),
-});
-
-const toTableRow = ({ command, startup, replies }) => ({
-  "运行命令": command,
-  "启动": startup,
-  ...Object.fromEntries(replies.map((time, index) => [
-    `第 ${index + 1} 次回复`,
-    time,
-  ])),
-});
-
-const toTable = pipe(
-  (measurements) => measurements.map(formatResult),
-  (results) => results.map(toTableRow),
-);
-
-const measurements = await measureBenchmarks(benchmarks);
-
-console.table(toTable(measurements));
+function toTableRow({ command, startup, replies }) {
+  return {
+    "运行命令": command,
+    "启动": startup,
+    ...Object.fromEntries(replies.map((time, index) => [
+      `第 ${index + 1} 次回复`,
+      time,
+    ])),
+  };
+};
