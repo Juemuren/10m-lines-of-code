@@ -18,12 +18,19 @@ readline.on("line", (input) => {
 
 readline.prompt();
 
-const parseInteger = (s) =>
-  /^\d+$/.test(s)
+const processInput = pipe(
+  (s) => s.trim(),
+  parseInteger,
+  checkParity,
+);
+
+function parseInteger(s) {
+  return /^\d+$/.test(s)
     ? BigInt(s)
     : null;
+};
 
-const checkParity = (n) => {
+function checkParity(n) {
   if (n === null) return "请输入整数";
 
   switch (isEven(n)) {
@@ -33,13 +40,7 @@ const checkParity = (n) => {
   }
 };
 
-const processInput = pipe(
-  (s) => s.trim(),
-  parseInteger,
-  checkParity
-);
-
-const isEven = (n) => {
+function isEven(n) {
   switch (n) {
 /* CODEGEN-BEGIN */
 case 0n: return true;
