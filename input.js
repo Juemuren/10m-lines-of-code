@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { createInterface } from "node:readline";
-import { pipe } from "./utils.js";
+import { bind, err, ok, pipe } from "./utils.js";
 
 console.log("奇偶数判断");
 
@@ -21,23 +21,28 @@ readline.prompt();
 const processInput = pipe(
   (s) => s.trim(),
   parseInteger,
-  checkParity,
+  bind(checkParity),
+  toResult,
 );
 
 function parseInteger(s) {
   return /^\d+$/.test(s)
-    ? BigInt(s)
-    : null;
+    ? ok(BigInt(s))
+    : err("请输入非负整数");
 };
 
 function checkParity(n) {
-  if (n === null) return "请输入整数";
-
   switch (isEven(n)) {
-    case true: return "是偶数";
-    case false: return "不是偶数";
-    default: return "超出范围";
+    case true: return ok("是偶数");
+    case false: return ok("不是偶数");
+    default: return err("超出范围");
   }
+};
+
+function toResult(result) {
+  return result.ok
+      ? result.value
+      : result.error;
 };
 
 function isEven(n) {
