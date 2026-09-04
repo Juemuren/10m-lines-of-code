@@ -4,18 +4,19 @@ export function pipe(...fns) {
       (value, fn) => fn(value),
       value
     );
-}
+};
 
 export function* range(min, max, step = 1) {
-  for (let n = min; n <= max; n += step) yield n;
-}
+  for (let n = min; n <= max; n += step)
+    yield n;
+};
 
 export function ok(value) {
   return {
     ok: true,
     value
   };
-} 
+};
 
 export function err(error) {
   return {

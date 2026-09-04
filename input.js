@@ -34,7 +34,7 @@ function parseInteger(s) {
 function checkParity(n) {
   switch (isEven(n)) {
     case true: return ok("是偶数");
-    case false: return ok("不是偶数");
+    case false: return ok("是奇数");
     default: return err("超出范围");
   }
 };
