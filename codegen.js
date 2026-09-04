@@ -16,27 +16,29 @@ const [
 const source = await readFile(INPUT, "utf8");
 
 const codegen = pipe(
-  splitSource,
-  generate,
+  splitSource(BEGIN, END),
+  generate(max, batchSize, BEGIN, END),
 );
 
 await writeFile(OUTPUT, codegen(source));
 
-function splitSource(source) {
-  return {
-    before: source.split(BEGIN)[0],
-    after: source.split(END)[1],
-  }
+function splitSource(begin, end) {
+  return source => ({
+    before: source.split(begin)[0],
+    after: source.split(end)[1],
+  });
 };
 
-function* generate({ before, after }) {
-  yield `${before}${BEGIN}\n`;
-  yield* range(0, max, batchSize).map(renderBatch);
-  yield `${END}${after}`;
+function generate(max, batchSize, begin, end) {
+  return function* ({ before, after }) {
+    yield `${before}${begin}\n`;
+    yield* range(0, max, batchSize).map(renderBatch(max, batchSize));
+    yield `${end}${after}`;
+  };
 };
 
-function renderBatch(start) {
-  return Array.from(
+function renderBatch(max, batchSize) {
+  return start => Array.from(
     { length: Math.min(batchSize, max - start + 1) },
     (_, offset) => renderCase(start + offset)
   ).join("");
