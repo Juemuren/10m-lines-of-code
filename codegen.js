@@ -9,7 +9,7 @@ const INPUT = "input.js";
 const OUTPUT = "output.js";
 
 const [
-  max = 10000000,
+  lines = 10000000,
   batchSize = 4096,
 ] = process.argv.slice(2).map(Number);
 
@@ -17,7 +17,7 @@ const source = await readFile(INPUT, "utf8");
 
 const codegen = pipe(
   splitSource(BEGIN, END),
-  generate(max, batchSize, BEGIN, END),
+  generate(lines, batchSize, BEGIN, END),
 );
 
 await writeFile(OUTPUT, codegen(source));
@@ -39,8 +39,8 @@ function generate(max, batchSize, begin, end) {
 
 function renderBatch(max, batchSize) {
   return start => Array.from(
-    { length: Math.min(batchSize, max - start + 1) },
-    (_, offset) => renderCase(start + offset)
+    range(start, Math.min(start + batchSize - 1, max)),
+    renderCase,
   ).join("");
 };
 
